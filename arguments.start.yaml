@@ -1,0 +1,22 @@
+endpoint: http://localhost:8000
+genesis-file: ./pool_transactions_builder_genesis
+
+wallet-type: indy
+wallet-name: my-issuer
+wallet-key: issuer
+wallet-storage-type: postgres_storage
+wallet-storage-config: '{"url":"db:5432","max_connections":5}'
+wallet-storage-creds: '{"account":"postgres","password":"mysecretpassword","admin_account":"postgres","admin_password":"mysecretpassword"}'
+
+inbound-transport:
+  - [http, 0.0.0.0, 8000]
+outbound-transport: http
+webhook-url: http://localhost:4455/webhooks
+
+admin:
+  - 0.0.0.0
+  - 11000
+admin-insecure-mode: true
+
+label: Laurence
+public-invites: true

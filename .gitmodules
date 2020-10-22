@@ -1,0 +1,3 @@
+[submodule "indy-sdk"]
+	path = indy-sdk
+	url = https://github.com/hyperledger/indy-sdk.git
