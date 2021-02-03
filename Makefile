@@ -1,4 +1,7 @@
-build: build-acapy build-issuer
+build: build-acapy build-issuer build-tails-server
+
+build-tails-server:
+	docker-compose --env-file .env.prod build tails-server
 
 build-acapy:
 	docker-compose --env-file .env.prod build acapy
@@ -6,14 +9,14 @@ build-acapy:
 build-issuer:
 	docker-compose --env-file .env.prod build issuer
 
-start-db:
-	docker-compose -f docker-compose.local.yaml up -d db
+up:
+	docker-compose -f docker-compose.local.yml --env-file .env.local up -d
 
-start-local:
-	docker-compose -f docker-compose.local.yaml --env-file .env.local up --force-recreate --no-deps -d acapy issuer
+logs:
+	docker-compose -f docker-compose.local.yml --env-file .env.local logs -f
 
-start-prod:
-	docker-compose -f docker-compose.prod.yaml --env-file .env.prod up --force-recreate --no-deps -d acapy issuer nginx
+down:
+	docker-compose -f docker-compose.local.yml --env-file .env.local down
 
-logs-local:
-	docker-compose -f docker-compose.local.yaml --env-file .env.local logs -f
+up-prod:
+	docker-compose -f docker-compose.prod.yml --env-file .env.prod up --force-recreate --no-deps -d acapy issuer nginx

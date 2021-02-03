@@ -20,7 +20,16 @@ func main() {
 	issuerPort := os.Getenv("ISSUER_PORT")
 
 	app := App{
-		acapy: acapy.NewClient(fmt.Sprintf("http://acapy:%s", acapyAdminPort), ""),
+		acapy: acapy.NewClient(fmt.Sprintf("http://acapy:%s", acapyAdminPort)),
+	}
+
+	ready, err := app.acapy.IsReady()
+	if err != nil {
+		log.Fatalf("Error while checking if ACA-py is ready: %s", err.Error())
+		return
+	} else if !ready {
+		log.Fatalf("ACA-py has started but it not ready")
+		return
 	}
 
 	r := mux.NewRouter()

@@ -4,3 +4,6 @@
 [submodule "aries-cloudagent-python"]
 	path = aries-cloudagent-python
 	url = https://github.com/hyperledger/aries-cloudagent-python.git
+[submodule "indy-tails-server"]
+	path = indy-tails-server
+	url = https://github.com/bcgov/indy-tails-server.git
