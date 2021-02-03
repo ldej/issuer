@@ -1,1 +1,4 @@
 .postgres
+.git
+aries-cloudagent-python/.git
+indy-sdk/.git

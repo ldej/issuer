@@ -1,2 +1,0 @@
-aries-cloudagent==0.5.6
-python3-indy>=1.11.1<2

@@ -1,0 +1,79 @@
+version: '3'
+services:
+  acapy:
+    build:
+      context: .
+      dockerfile: ./docker/acapy.dockerfile
+    image: ldej.nl/acapy
+    env_file:
+      - .env.local
+    depends_on:
+      - db
+    ports:
+      - "${ACAPY_ADMIN_PORT}:${ACAPY_ADMIN_PORT}"
+      - "${ACAPY_ENDPOINT_PORT}:${ACAPY_ENDPOINT_PORT}"
+    environment:
+      - WAIT_HOSTS=db:5432
+      - WAIT_HOSTS_TIMEOUT=300
+      - WAIT_SLEEP_INTERVAL=5
+      - WAIT_HOST_CONNECT_TIMEOUT=3
+    entrypoint: /bin/bash
+    command: [
+       "-c",
+       "curl -d '{\"seed\":\"${AGENT_WALLET_SEED}\", \"role\":\"TRUST_ANCHOR\", \"alias\":\"${LABEL}\"}' -X POST ${LEDGER_URL}/register; \
+        sleep 5; \
+        /wait; \
+        aca-py start \
+        --auto-provision \
+        -it http '0.0.0.0' ${ACAPY_ENDPOINT_PORT} \
+        -ot http \
+        --admin '0.0.0.0' ${ACAPY_ADMIN_PORT} \
+        -e ${ACAPY_ENDPOINT_URL} \
+        --webhook-url http://issuer:${ISSUER_PORT}/webhooks
+        --wallet-type indy \
+        --wallet-name ${WALLET_NAME}
+        --wallet-key ${WALLET_KEY}
+        --wallet-storage-type postgres_storage
+        --wallet-storage-config '{\"url\":\"db:5432\",\"max_connections\":5}'
+        --wallet-storage-creds '{\"account\":\"postgres\",\"password\":\"password\",\"admin_account\":\"postgres\",\"admin_password\":\"password\"}'
+        --seed ${AGENT_WALLET_SEED} \
+        --genesis-url ${LEDGER_URL}/genesis \
+        --label ${LABEL} \
+        --auto-accept-invites \
+        --admin-insecure-mode \
+        --log-level info",
+    ]
+
+  db:
+    image: postgres:latest
+    hostname: db
+    environment:
+      POSTGRES_DB: postgres
+      POSTGRES_USER: postgres
+      POSTGRES_PASSWORD: password
+    volumes:
+      - ./.postgres:/var/lib/postgresql
+    ports:
+      - "5432:5432"
+
+  issuer:
+    env_file:
+      - .env.local
+    build:
+      context: .
+      dockerfile: ./docker/issuer.dockerfile
+    image: ldej.nl/issuer
+    depends_on:
+      - acapy
+    environment:
+      ACAPY_ADMIN_PORT: "${ACAPY_ADMIN_PORT}"
+      ISSUER_PORT: "${ISSUER_PORT}"
+    ports:
+      - "${ISSUER_PORT}:${ISSUER_PORT}"
+    volumes:
+    - ./issuer:/go/src/issuer
+    command: [
+        "go",
+        "run",
+        ".",
+    ]

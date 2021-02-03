@@ -1,3 +1,6 @@
 [submodule "indy-sdk"]
 	path = indy-sdk
 	url = https://github.com/hyperledger/indy-sdk.git
+[submodule "aries-cloudagent-python"]
+	path = aries-cloudagent-python
+	url = https://github.com/hyperledger/aries-cloudagent-python.git

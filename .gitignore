@@ -1,2 +1,4 @@
 .postgres
 .idea
+.env.prod
+.env.local

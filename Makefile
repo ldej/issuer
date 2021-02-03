@@ -1,13 +1,19 @@
+build: build-acapy build-issuer
 
-build:
-	docker build . -t ldej.nl/issuer
+build-acapy:
+	docker-compose --env-file .env.prod build acapy
+
+build-issuer:
+	docker-compose --env-file .env.prod build issuer
 
 start-db:
-	docker-compose up --scale issuer=0
+	docker-compose -f docker-compose.local.yaml up -d db
 
-provision:
-	# aca-py provision --arg-file ./arguments.provision.yaml
-	docker run --net=host -it ldej.nl/issuer /bin/bash -c "aca-py provision --arg-file ./arguments.provision.yaml"
+start-local:
+	docker-compose -f docker-compose.local.yaml --env-file .env.local up --force-recreate --no-deps -d acapy issuer
 
-start:
-	docker-compose up
+start-prod:
+	docker-compose -f docker-compose.prod.yaml --env-file .env.prod up --force-recreate --no-deps -d acapy issuer nginx
+
+logs-local:
+	docker-compose -f docker-compose.local.yaml --env-file .env.local logs -f
