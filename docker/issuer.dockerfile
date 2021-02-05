@@ -1,9 +1,13 @@
-FROM golang:1.15
+FROM golang:1.15-alpine
 
 WORKDIR /go/src/issuer/
 COPY issuer .
 
-RUN go get -d -v ./...
-RUN go install -v ./...
+RUN go mod download
+RUN go build -o issuer .
 
-CMD ["issuer"]
+# Add docker-compose-wait tool
+ADD https://github.com/ufoscout/docker-compose-wait/releases/download/2.7.3/wait /wait
+RUN chmod +x /wait
+
+CMD /wait && ./issuer

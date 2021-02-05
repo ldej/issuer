@@ -1,0 +1,25 @@
+version: '3'
+services:
+  issuer:
+    build:
+      context: .
+      dockerfile: ./docker/issuer.dockerfile
+    volumes:
+    - ./issuer:/go/src/issuer
+    command: [
+        "sh",
+        "-c",
+        "/wait && go run ."
+    ]
+
+  acapy:
+    build:
+      context: .
+      dockerfile: ./docker/acapy.dockerfile
+
+  tails-server:
+    build:
+      context: ./indy-tails-server
+      dockerfile: ./docker/Dockerfile.tails-server
+    volumes:
+      - ./tails-files:/tmp/tails-files/

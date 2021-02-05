@@ -35,7 +35,7 @@ $ ./docker/manage start
 ### Create an environment file
 
 ```shell
-$ cat .env.local
+$ cat .env
 AGENT_WALLET_SEED=<some-32-char-wallet-seed>
 LABEL=<name-of-your-application>
 ACAPY_ENDPOINT_PORT=8000
@@ -50,10 +50,13 @@ WALLET_KEY=<secret>
 ### Start
 
 ```shell
-$ make start-db
-$ make start-local
-$ make logs-local
+$ make up
+$ make logs
 ```
+
+## Running against BCoverin ledgers
+
+TODO
 
 ## ACA-py docker image
 
@@ -65,7 +68,24 @@ The issuer docker image is used for both building and running the Go application
 
 ## nginx and certbot
 
-I used [this blog post](https://medium.com/@pentacent/nginx-and-lets-encrypt-with-docker-in-less-than-5-minutes-b4b8a60d3a71) as a source of inspiration for getting the easiest set up to work. That's also where `init-letsencrypt.sh` comes from.
+I used [this blog post](https://medium.com/@pentacent/nginx-and-lets-encrypt-with-docker-in-less-than-5-minutes-b4b8a60d3a71) as a source of inspiration for getting the easiest set up to work. That's also where `init-letsencrypt.sh` comes from. I modified it to fit my structure.
+
+For the first deployment, copy the following to the remote host:
+- init-letsencrypt.sh 
+- .env.prod 
+- docker-compose.yml 
+- docker-compose.prod.yml 
+- ./nginx
+
+For example using rsync:
+```shell
+$ rsync -a --partial --progress -h init-letsencrypt.sh .env.prod docker-compose.yml docker-compose.prod.yml ./nginx user@hostname:/issuer
+```
+
+Then run it:
+```shell
+$ cd /issuer && ./init-letsencrypt.sh
+```
 
 ## docker-compose
 
@@ -74,9 +94,14 @@ I tried to understand the [aries-cloudagent-python/deploymentModel.md](https://g
 
 ## Deployment
 
-This issuer is deployed on Digital Ocean using the cheapest pre-installed docker droplet. Apparently the `ufw` firewill is enabled by default.
+This issuer is deployed on Digital Ocean using the cheapest pre-installed docker droplet. Apparently the `ufw` firewall is enabled by default.
 
 https://www.digitalocean.com/docs/networking/firewalls/resources/troubleshooting/
+
+```shell
+$ docker context create remote --docker "host=ssh://user@hostname"
+$ docker-compose --context remote logs
+```
 
 ## TODO
 
