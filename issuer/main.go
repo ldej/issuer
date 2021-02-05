@@ -93,10 +93,22 @@ func (app *App) createInvitation(w http.ResponseWriter, r *http.Request) {
 }
 
 func (app *App) registerSchema(w http.ResponseWriter, r *http.Request) {
+	var request = struct {
+		Name       string   `json:"name"`
+		Version    string   `json:"version"`
+		Attributes []string `json:"attributes"`
+	}{}
+	err := json.NewDecoder(r.Body).Decode(&request)
+	if err != nil {
+		log.Printf("Failed to decode request: %s", err.Error())
+		w.WriteHeader(http.StatusBadRequest)
+		return
+	}
+
 	schema, err := app.acapy.RegisterSchema(
-		"ldej",
-		"1.0",
-		[]string{"date"},
+		request.Name,
+		request.Version,
+		request.Attributes,
 	)
 	if err != nil {
 		log.Printf("Failed to register schema: %s", err.Error())
@@ -149,12 +161,12 @@ func (app *App) issueCredential(w http.ResponseWriter, r *http.Request) {
 	}
 
 	_, err = app.acapy.IssueCredential(
-		request.CredentialDefinitionID,
 		request.ConnectionID,
-		"", //request.IssuerDID,
-		request.Comment,
 		acapy.NewCredentialPreview(attributes),
-		"", //request.SchemaID,
+		request.Comment,
+		request.CredentialDefinitionID,
+		request.IssuerDID,
+		request.SchemaID,
 	)
 	if err != nil {
 		log.Printf("Failed to issue credential: %s", err.Error())

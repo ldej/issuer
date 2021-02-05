@@ -103,6 +103,10 @@ $ docker context create remote --docker "host=ssh://user@hostname"
 $ docker-compose --context remote logs
 ```
 
+### Permissions
+
+If the tails-server gets a permission denied on the volume, then `chown -R 1001:1001 /issuer/tails-files`. 
+
 ## TODO
 
 - Automate deployment using Github Actions

@@ -1,0 +1,51 @@
+name: Build and push docker images
+on: [push]
+jobs:
+
+  main:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Check out code
+        uses: actions/checkout@v2
+        with:
+          submodules: true
+          fetch-depth: 0    # Fetch all history for .GitInfo and .Lastmod
+
+      - name: Set up QEMU
+        uses: docker/setup-qemu-action@v1
+
+      - name: Set up Docker Buildx
+        uses: docker/setup-buildx-action@v1
+
+      - name: Login to DockerHub
+        uses: docker/login-action@v1
+        with:
+          username: ${{ secrets.DOCKERHUB_USERNAME }}
+          password: ${{ secrets.DOCKERHUB_TOKEN }}
+
+      - name: Build and push ACA-py
+        id: docker_build
+        uses: docker/build-push-action@v2
+        with:
+          context: .
+          file: ./docker/acapy.dockerfile
+          push: true
+          tags: ldej/acapy:latest
+
+      - name: Build and push tails-server
+        id: docker_build
+        uses: docker/build-push-action@v2
+        with:
+          context: ./indy-tails-server/
+          file: ./docker/Dockerfile.tails-server
+          push: true
+          tags: ldej/tails-server:latest
+
+      - name: Build and push issuer
+        id: docker_build
+        uses: docker/build-push-action@v2
+        with:
+          context: .
+          file: ./docker/issuer.dockerfile
+          push: true
+          tags: ldej/issuer:latest

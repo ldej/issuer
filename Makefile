@@ -1,3 +1,5 @@
+.PHONY: issuer
+
 build: build-acapy build-issuer build-tails-server
 
 build-tails-server:

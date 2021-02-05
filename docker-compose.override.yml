@@ -22,4 +22,4 @@ services:
       context: ./indy-tails-server
       dockerfile: ./docker/Dockerfile.tails-server
     volumes:
-      - ./tails-files:/tmp/tails-files/
+      - ./tails-files:/tails-files/
