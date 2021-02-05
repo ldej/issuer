@@ -24,7 +24,7 @@ jobs:
           password: ${{ secrets.DOCKERHUB_TOKEN }}
 
       - name: Build and push ACA-py
-        id: docker_build
+        id: docker_build_acapy
         uses: docker/build-push-action@v2
         with:
           context: .
@@ -33,7 +33,7 @@ jobs:
           tags: ldej/acapy:latest
 
       - name: Build and push tails-server
-        id: docker_build
+        id: docker_build_tails_server
         uses: docker/build-push-action@v2
         with:
           context: ./indy-tails-server/
@@ -42,7 +42,7 @@ jobs:
           tags: ldej/tails-server:latest
 
       - name: Build and push issuer
-        id: docker_build
+        id: docker_build_issuer
         uses: docker/build-push-action@v2
         with:
           context: .
