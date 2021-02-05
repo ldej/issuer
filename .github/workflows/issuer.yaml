@@ -37,7 +37,7 @@ jobs:
         uses: docker/build-push-action@v2
         with:
           context: ./indy-tails-server/
-          file: ./docker/Dockerfile.tails-server
+          file: ./indy-tails-server/docker/Dockerfile.tails-server
           push: true
           tags: ldej/tails-server:latest
 
