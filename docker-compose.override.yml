@@ -1,11 +1,11 @@
 version: '3'
 services:
-  issuer:
+  controller:
     build:
       context: .
-      dockerfile: ./docker/issuer.dockerfile
+      dockerfile: docker/controller.dockerfile
     volumes:
-    - ./issuer:/go/src/issuer
+    - ./controller:/go/src/controller
     command: [
         "sh",
         "-c",

@@ -24,7 +24,7 @@ services:
         -ot http \
         --admin '0.0.0.0' ${ACAPY_ADMIN_PORT} \
         -e ${ACAPY_ENDPOINT_URL} \
-        --webhook-url http://issuer:${ISSUER_PORT}/webhooks
+        --webhook-url http://issuer:${CONTROLLER_PORT}/webhooks
         --wallet-type indy \
         --wallet-name ${WALLET_NAME}
         --wallet-key ${WALLET_KEY}
@@ -33,7 +33,7 @@ services:
         --wallet-storage-creds '{\"account\":\"postgres\",\"password\":\"password\",\"admin_account\":\"postgres\",\"admin_password\":\"password\"}'
         --seed ${AGENT_WALLET_SEED} \
         --genesis-url ${LEDGER_URL}/genesis \
-        --tails-server-base-url http://tails-server:6543 \
+        --tails-server-base-url ${TAILS_SERVER_URL} \
         --label ${LABEL} \
         --auto-accept-invites \
         --admin-insecure-mode \
@@ -44,19 +44,19 @@ services:
     image: postgres:latest
     hostname: db
     environment:
-      POSTGRES_DB: postgres
       POSTGRES_USER: postgres
       POSTGRES_PASSWORD: password
     volumes:
+      - ./postgres:/docker-entrypoint-initdb.d/
       - ./.postgres:/var/lib/postgresql
     ports:
       - "5432:5432"
 
-  issuer:
+  controller:
     image: ldej/issuer:latest
     environment:
       ACAPY_ADMIN_PORT: "${ACAPY_ADMIN_PORT}"
-      ISSUER_PORT: "${ISSUER_PORT}"
+      CONTROLLER_PORT: "${CONTROLLER_PORT}"
       WAIT_HOSTS: "acapy:${ACAPY_ADMIN_PORT}"
       WAIT_HOSTS_TIMEOUT: "300"
       WAIT_SLEEP_INTERVAL: "5"
@@ -64,7 +64,7 @@ services:
     depends_on:
       - acapy
     ports:
-      - "${ISSUER_PORT}:${ISSUER_PORT}"
+      - "${CONTROLLER_PORT}:${CONTROLLER_PORT}"
 
   tails-server:
     image: ldej/tails-server:latest

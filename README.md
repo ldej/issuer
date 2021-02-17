@@ -42,7 +42,7 @@ ACAPY_ENDPOINT_PORT=8000
 ACAPY_ENDPOINT_URL=http://localhost:8000/
 ACAPY_ADMIN_PORT=11000
 LEDGER_URL=http://172.17.0.1:9000
-ISSUER_PORT=8080
+CONTROLLER_PORT=8080
 WALLET_NAME=<wallet-name>
 WALLET_KEY=<secret>
 ```
@@ -110,6 +110,5 @@ If the tails-server gets a permission denied on the volume, then `chown -R 1001:
 ## TODO
 
 - Automate deployment using Github Actions
-- Push docker images to a registry (which one?, the cheapest one!)
 - Add functionality for issuing credentials
 - Add a frontend

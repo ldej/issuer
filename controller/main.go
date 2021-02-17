@@ -19,7 +19,7 @@ type App struct {
 
 func main() {
 	acapyAdminPort := os.Getenv("ACAPY_ADMIN_PORT")
-	issuerPort := os.Getenv("ISSUER_PORT")
+	issuerPort := os.Getenv("CONTROLLER_PORT")
 
 	app := App{
 		acapy: acapy.NewClient(fmt.Sprintf("http://acapy:%s", acapyAdminPort)),

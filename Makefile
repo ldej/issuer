@@ -1,6 +1,6 @@
 .PHONY: issuer
 
-build: build-acapy build-issuer build-tails-server
+build: build-acapy build-controller build-tails-server
 
 build-tails-server:
 	docker-compose build tails-server
@@ -8,8 +8,8 @@ build-tails-server:
 build-acapy:
 	docker-compose build acapy
 
-build-issuer:
-	docker-compose build issuer
+build-controller:
+	docker-compose build controller
 
 up:
 	docker-compose up --force-recreate -d

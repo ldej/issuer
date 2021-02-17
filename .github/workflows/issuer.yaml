@@ -28,6 +28,6 @@ jobs:
         uses: docker/build-push-action@v2
         with:
           context: .
-          file: ./docker/issuer.dockerfile
+          file: ./docker/controller.dockerfile
           push: true
           tags: ldej/issuer:latest

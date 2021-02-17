@@ -26,3 +26,5 @@ RUN chmod +x /wait
 
 # Announce location of libindystrgpostgres.so
 ENV LD_LIBRARY_PATH /indy-sdk/experimental/plugins/postgres_storage/target/debug
+
+ENTRYPOINT ["/bin/bash", "-c", "/wait && aca-py \"$@\"", "--"]
