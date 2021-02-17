@@ -1,5 +1,7 @@
 # Issuer
 
+https://ldej.nl/post/building-an-acapy-controller-architecture/
+
 ## Checkout
 
 ```
@@ -42,6 +44,7 @@ ACAPY_ENDPOINT_PORT=8000
 ACAPY_ENDPOINT_URL=http://localhost:8000/
 ACAPY_ADMIN_PORT=11000
 LEDGER_URL=http://172.17.0.1:9000
+TAILS_SERVER_URL=http://tails-server:6543
 CONTROLLER_PORT=8080
 WALLET_NAME=<wallet-name>
 WALLET_KEY=<secret>
@@ -54,7 +57,7 @@ $ make up
 $ make logs
 ```
 
-## Running against BCoverin ledgers
+## Connecting to BCoverin ledgers
 
 TODO
 
@@ -62,9 +65,9 @@ TODO
 
 The ACA-py docker image is made with the [acapy.dockerfile](./docker/acapy.dockerfile). It is a custom image where libindy is installed and the postgres plugin is installed as a wallet storage backend. I could only install the postgres plugin with the `indy-sdk` repository, that's why it is a git submodule. `aries-cloudagent-python` is included in this repo as a submodule, so I can run the latest ~master~, I mean _main_ branch.
 
-## Issuer docker image
+## Controller docker image
 
-The issuer docker image is used for both building and running the Go application.
+The controller docker image is used for both building and running the Go application.
 
 ## nginx and certbot
 
@@ -76,11 +79,6 @@ For the first deployment, copy the following to the remote host:
 - docker-compose.yml 
 - docker-compose.prod.yml 
 - ./nginx
-
-For example using rsync:
-```shell
-$ rsync -a --partial --progress -h init-letsencrypt.sh .env.prod docker-compose.yml docker-compose.prod.yml ./nginx user@hostname:/issuer
-```
 
 Then run it:
 ```shell
