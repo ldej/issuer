@@ -3,7 +3,7 @@ services:
   nginx:
     image: nginx:1.15-alpine
     depends_on:
-      - issuer
+      - controller
       - acapy
       - tails-server
     ports:
