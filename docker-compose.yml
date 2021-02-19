@@ -24,7 +24,7 @@ services:
         -ot http \
         --admin '0.0.0.0' ${ACAPY_ADMIN_PORT} \
         -e ${ACAPY_ENDPOINT_URL} \
-        --webhook-url http://issuer:${CONTROLLER_PORT}/webhooks
+        --webhook-url http://controller:${CONTROLLER_PORT}/webhooks
         --wallet-type indy \
         --wallet-name ${WALLET_NAME}
         --wallet-key ${WALLET_KEY}

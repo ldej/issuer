@@ -14,7 +14,7 @@ build-controller:
 up:
 	docker-compose up --force-recreate -d
 
-issuer:
+controller:
 	docker-compose up --force-recreate --no-deps -d controller
 
 logs:
