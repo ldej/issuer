@@ -15,7 +15,7 @@ up:
 	docker-compose up --force-recreate -d
 
 issuer:
-	docker-compose up --force-recreate --no-deps -d issuer
+	docker-compose up --force-recreate --no-deps -d controller
 
 logs:
 	docker-compose logs -f --tail=100
@@ -28,8 +28,8 @@ up-prod:
 	docker-compose --context remote -f docker-compose.yml -f docker-compose.prod.yml --env-file .env.prod up --force-recreate -d
 
 issuer-prod:
-	docker-compose --context remote -f docker-compose.yml -f docker-compose.prod.yml --env-file .env.prod pull issuer
-	docker-compose --context remote -f docker-compose.yml -f docker-compose.prod.yml --env-file .env.prod up --force-recreate --no-deps -d issuer
+	docker-compose --context remote -f docker-compose.yml -f docker-compose.prod.yml --env-file .env.prod pull controller
+	docker-compose --context remote -f docker-compose.yml -f docker-compose.prod.yml --env-file .env.prod up --force-recreate --no-deps -d controller
 
 acapy-prod:
 	docker-compose --context remote -f docker-compose.yml -f docker-compose.prod.yml --env-file .env.prod pull acapy
@@ -41,5 +41,5 @@ logs-remote:
 
 push:
 	docker push ldej/acapy
-	docker push ldej/issuer
+	docker push ldej/controller
 	docker push ldej/tails-server

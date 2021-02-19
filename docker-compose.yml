@@ -53,7 +53,7 @@ services:
       - "5432:5432"
 
   controller:
-    image: ldej/issuer:latest
+    image: ldej/controller:latest
     environment:
       ACAPY_ADMIN_PORT: "${ACAPY_ADMIN_PORT}"
       CONTROLLER_PORT: "${CONTROLLER_PORT}"

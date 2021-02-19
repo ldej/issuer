@@ -30,4 +30,4 @@ jobs:
           context: .
           file: ./docker/controller.dockerfile
           push: true
-          tags: ldej/issuer:latest
+          tags: ldej/controller:latest
