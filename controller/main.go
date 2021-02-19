@@ -155,7 +155,9 @@ func (app *App) registerSchema(w http.ResponseWriter, r *http.Request) {
 
 func (app *App) createCredentialDefinition(w http.ResponseWriter, r *http.Request) {
 	var request = struct {
-		SchemaID string `json:"schema_id"`
+		SchemaID               string `json:"schema_id"`
+		SupportRevocation      bool   `json:"support_revocation"`
+		RevocationRegistrySize int    `json:"revocation_registry_size"`
 	}{}
 	err := json.NewDecoder(r.Body).Decode(&request)
 	if err != nil {
@@ -163,7 +165,7 @@ func (app *App) createCredentialDefinition(w http.ResponseWriter, r *http.Reques
 		w.WriteHeader(http.StatusBadRequest)
 		return
 	}
-	credentialDefinitionID, err := app.acapy.CreateCredentialDefinition("", true, 4, request.SchemaID)
+	credentialDefinitionID, err := app.acapy.CreateCredentialDefinition("", request.SupportRevocation, request.RevocationRegistrySize, request.SchemaID)
 	if err != nil {
 		log.Printf("Failed to create credential definition: %s", err.Error())
 		w.WriteHeader(http.StatusInternalServerError)
