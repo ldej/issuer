@@ -10,15 +10,19 @@ RUN apt-key adv --keyserver keyserver.ubuntu.com --recv-keys 68DB5E88 && \
 
 # Build libindystrgpostgres.so for connecting to postgres
 # requires cargo libzmq3-dev libsodium-dev pkg-config libssl-dev
-ADD indy-sdk /indy-sdk
+ADD ./indy-sdk /indy-sdk
 RUN cd /indy-sdk/experimental/plugins/postgres_storage && cargo build
 
+WORKDIR /aries-cloudagent-python
+ADD aries-cloudagent-python/requirement*.txt ./
+RUN pip3 install --no-cache-dir -r requirements.txt -r requirements.dev.txt -r requirements.indy.txt
+
 # Install ACA-py
-# requires python3-pip
-ADD aries-cloudagent-python /aries-cloudagent-python
-RUN cd /aries-cloudagent-python && \
-    pip3 install -r requirements.indy.txt && \
-    pip3 install --no-cache-dir -e .
+ADD aries-cloudagent-python/aries_cloudagent ./aries_cloudagent
+ADD aries-cloudagent-python/bin ./bin
+RUN touch ./README.md
+ADD aries-cloudagent-python/setup.py ./
+RUN pip3 install --no-cache-dir -e .
 
 # Add docker-compose-wait tool
 ADD https://github.com/ufoscout/docker-compose-wait/releases/download/2.7.3/wait /wait
