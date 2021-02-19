@@ -39,23 +39,34 @@ func main() {
 	r := mux.NewRouter()
 	{
 		api := r.PathPrefix("/api").Subrouter()
-		api.HandleFunc("/create-invitation", app.createInvitation).Methods(http.MethodPost)
-		api.HandleFunc("/schema", app.registerSchema).Methods(http.MethodPost)
-		api.HandleFunc("/credential-definition", app.createCredentialDefinition).Methods(http.MethodPost)
-		api.HandleFunc("/issue-credential", app.issueCredential).Methods(http.MethodPost)
+		{
+			var v1 = api.PathPrefix("/v1").Subrouter()
+			v1.HandleFunc("/create-invitation", app.createInvitationV1).Methods(http.MethodPost)
+			v1.HandleFunc("/schema", app.registerSchema).Methods(http.MethodPost)
+			v1.HandleFunc("/credential-definition", app.createCredentialDefinition).Methods(http.MethodPost)
+			v1.HandleFunc("/issue-credential", app.issueCredentialV1).Methods(http.MethodPost)
+		}
+		{
+			var v2 = api.PathPrefix("/v2").Subrouter()
+			v2.HandleFunc("/create-invitation", app.createInvitationV2).Methods(http.MethodPost)
+			v2.HandleFunc("/issue-credential", app.issueCredentialV2).Methods(http.MethodPost)
+		}
 	}
 
-	r.HandleFunc("/webhooks/topic/{topic}/", acapy.WebhookHandler(
-		app.ConnectionsEventHandler,
-		nil,
-		nil,
-		nil,
-		nil,
-		nil,
-		nil,
-		nil,
-		app.OutOfBandEventHandler,
-	))
+	r.HandleFunc("/webhooks/topic/{topic}/", acapy.CreateWebhooksHandler(acapy.WebhookHandlers{
+		ConnectionsEventHandler:            app.ConnectionsEventHandler,
+		BasicMessagesEventHandler:          app.BasicMessagesEventHandler,
+		ProblemReportEventHandler:          app.ProblemReportEventHandler,
+		CredentialExchangeEventHandler:     app.CredentialExchangeEventHandler,
+		CredentialExchangeV2EventHandler:   app.CredentialExchangeV2EventHandler,
+		CredentialExchangeDIFEventHandler:  app.CredentialExchangeDIFEventHandler,
+		CredentialExchangeIndyEventHandler: app.CredentialExchangeIndyEventHandler,
+		RevocationRegistryEventHandler:     app.RevocationRegistryEventHandler,
+		PresentationExchangeEventHandler:   app.PresentationExchangeEventHandler,
+		CredentialRevocationEventHandler:   app.CredentialRevocationEventHandler,
+		PingEventHandler:                   app.PingEventHandler,
+		OutOfBandEventHandler:              app.OutOfBandEventHandler,
+	}))
 	r.NotFoundHandler = http.HandlerFunc(NotFound)
 	loggedRouter := handlers.LoggingHandler(os.Stdout, r)
 
@@ -74,8 +85,32 @@ func NotFound(w http.ResponseWriter, r *http.Request) {
 	log.Printf("Not Found: %s", r.URL.String())
 }
 
-func (app *App) createInvitation(w http.ResponseWriter, r *http.Request) {
+func (app *App) createInvitationV1(w http.ResponseWriter, r *http.Request) {
 	invitation, err := app.acapy.CreateInvitation("", true, false, false)
+	if err != nil {
+		log.Printf("Failed to create invitation: %s", err.Error())
+		w.WriteHeader(http.StatusInternalServerError)
+		return
+	}
+
+	png, err := qrcode.Encode(invitation.InvitationURL, qrcode.Medium, 256)
+	if err != nil {
+		log.Printf("Failed to create qr code: %s", err.Error())
+		w.WriteHeader(http.StatusInternalServerError)
+		return
+	}
+	w.Write(png)
+	w.Header().Set("Content-Type", "image/png")
+}
+
+func (app *App) createInvitationV2(w http.ResponseWriter, r *http.Request) {
+	invitation, err := app.acapy.CreateOutOfBandInvitation(
+		acapy.CreateOutOfBandInvitationRequest{
+			HandshakeProtocols: acapy.DefaultHandshakeProtocols,
+		},
+		true,
+		false,
+	)
 	if err != nil {
 		log.Printf("Failed to create invitation: %s", err.Error())
 		w.WriteHeader(http.StatusInternalServerError)
@@ -137,7 +172,7 @@ func (app *App) createCredentialDefinition(w http.ResponseWriter, r *http.Reques
 	w.Write([]byte(credentialDefinitionID))
 }
 
-func (app *App) issueCredential(w http.ResponseWriter, r *http.Request) {
+func (app *App) issueCredentialV1(w http.ResponseWriter, r *http.Request) {
 	var request = struct {
 		ConnectionID           string            `json:"connection_id"`
 		CredentialDefinitionID string            `json:"credential_definition_id"`
@@ -175,14 +210,40 @@ func (app *App) issueCredential(w http.ResponseWriter, r *http.Request) {
 	}
 }
 
-func (app *App) ConnectionsEventHandler(event acapy.Connection) {
-	if event.Alias == "" {
-		connection, _ := app.acapy.GetConnection(event.ConnectionID)
-		event.Alias = connection.TheirLabel
+func (app *App) issueCredentialV2(w http.ResponseWriter, r *http.Request) {
+	var request = struct {
+		ConnectionID           string            `json:"connection_id"`
+		CredentialDefinitionID string            `json:"credential_definition_id"`
+		Attributes             map[string]string `json:"attributes"`
+		Comment                string            `json:"comment"`
+		IssuerDID              string            `json:"issuer_did"`
+		SchemaID               string            `json:"schema_id"`
+	}{}
+	err := json.NewDecoder(r.Body).Decode(&request)
+	if err != nil {
+		log.Printf("Failed to decode request: %s", err.Error())
+		w.WriteHeader(http.StatusBadRequest)
+		return
 	}
-	log.Printf(" -> Connection %q (%s), update to state %q rfc23 state %q", event.Alias, event.ConnectionID, event.State, event.RFC23State)
-}
+	var attributes []acapy.CredentialPreviewAttributeV2
+	for key, value := range request.Attributes {
+		attributes = append(attributes, acapy.CredentialPreviewAttributeV2{
+			Name:  key,
+			Value: value,
+		})
+	}
 
-func (app *App) OutOfBandEventHandler(event acapy.OutOfBandEvent) {
-	log.Printf(" -> Out of Band Event: %q state %q", event.InvitationID, event.State)
+	_, err = app.acapy.IssueCredentialV2(
+		request.ConnectionID,
+		acapy.NewCredentialPreviewV2(attributes),
+		request.Comment,
+		request.CredentialDefinitionID,
+		request.IssuerDID,
+		request.SchemaID,
+	)
+	if err != nil {
+		log.Printf("Failed to issue credential: %s", err.Error())
+		w.WriteHeader(http.StatusBadRequest)
+		return
+	}
 }
