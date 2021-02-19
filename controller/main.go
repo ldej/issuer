@@ -41,14 +41,14 @@ func main() {
 		api := r.PathPrefix("/api").Subrouter()
 		{
 			var v1 = api.PathPrefix("/v1").Subrouter()
-			v1.HandleFunc("/create-invitation", app.createInvitationV1).Methods(http.MethodPost)
+			v1.HandleFunc("/create-invitation", app.createInvitationV1).Methods(http.MethodGet)
 			v1.HandleFunc("/schema", app.registerSchema).Methods(http.MethodPost)
 			v1.HandleFunc("/credential-definition", app.createCredentialDefinition).Methods(http.MethodPost)
 			v1.HandleFunc("/issue-credential", app.issueCredentialV1).Methods(http.MethodPost)
 		}
 		{
 			var v2 = api.PathPrefix("/v2").Subrouter()
-			v2.HandleFunc("/create-invitation", app.createInvitationV2).Methods(http.MethodPost)
+			v2.HandleFunc("/create-invitation", app.createInvitationV2).Methods(http.MethodGet)
 			v2.HandleFunc("/issue-credential", app.issueCredentialV2).Methods(http.MethodPost)
 		}
 	}
