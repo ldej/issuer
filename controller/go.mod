@@ -1,4 +1,4 @@
-module github.com/ldej/issuer
+module github.com/ldej/controller
 
 go 1.15
 
